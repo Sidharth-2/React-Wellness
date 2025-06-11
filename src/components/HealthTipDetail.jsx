@@ -1,5 +1,6 @@
 // HealthTipDetail.js
 import React, { useEffect, useState } from 'react';
+import { apiClient } from '../utils/apiClient';
 
 function HealthTipDetail({ tipId }) {
   const [tip, setTip] = useState(null);
@@ -9,14 +10,8 @@ function HealthTipDetail({ tipId }) {
     const token = localStorage.getItem('token');
 
     if (tipId) {
-    fetch(`http://localhost:8081/api/healthtips/${tipId}`, {
-    method: 'GET',
-    headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  }
-}).then(res => res.json())
-        .then(data => setTip(data));
+    apiClient(`http://localhost:8081/api/healthtips/${tipId}`)
+    .then(data => setTip(data.data));
     }
   }, [tipId]);
 

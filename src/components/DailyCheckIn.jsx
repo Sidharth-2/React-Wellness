@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
+import { apiClient } from '../utils/apiClient';
 
 const DailyCheckIn = () => {
   const [mood, setMood] = useState('');
@@ -13,24 +14,20 @@ const DailyCheckIn = () => {
 const fetchCheckins = useCallback(() => {
 
     const token = localStorage.getItem('token'); 
-    console.log(token);
 
-    fetch('http://localhost:8081/api/checkin/checkins', {
-  method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  }
-}).then(response => response.json())
-      .then(data => {
-        
-        const sorted = data.sort((a, b) => b.id - a.id);
+    apiClient('http://localhost:8081/api/checkin/checkins')
+      .then(data =>  {
+
+        if (data.success){
+
+        const sorted = data.data.sort((a, b) => b.id - a.id);
         const last10 = sorted.slice(0, 10);
         const avg = last10.reduce((sum, item) => sum + item.progress, 0) / last10.length;
 
         setCheckins(sorted);
         setAverage(Math.round(avg));
 
+        }
       }
 
       )

@@ -1,5 +1,6 @@
 // HealthTipList.js
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '../utils/apiClient';
 
 function HealthTipList({ onSelect }) {
   const [tips, setTips] = useState([]);
@@ -8,15 +9,14 @@ function HealthTipList({ onSelect }) {
 
     const token = localStorage.getItem('token');
 
-  fetch('http://localhost:8081/api/healthtips', {
-  method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  }
-})
-      .then(res => res.json())
-      .then(data => setTips(data));
+  apiClient('http://localhost:8081/api/healthtips')
+      .then(data => {
+        
+        if(data.success) {
+        setTips(data.data);
+        }
+      }
+      )
   }, []);
 
   return (

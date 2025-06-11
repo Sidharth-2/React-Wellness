@@ -1,38 +1,33 @@
 import { Line } from 'react-chartjs-2';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js';
+import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { apiClient } from '../utils/apiClient';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement);
 
 const Reports = () => {
 
   const [chartData, setChartData] = useState(null);
+    const navigate = useNavigate();
 
-  useEffect(() => {
+  const fetchReports = useCallback(() => {
 
-        const token = localStorage.getItem('token');
+     try {
 
-    fetch('http://localhost:8081/api/checkin/checkins/reports', {
-    method: 'GET',
-    headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-    }
-  })
-      .then(res => res.json())
-      .then(data => {
+        apiClient('http://localhost:8081/api/checkin/checkins/reports')
+    .then(data => {
 
-        console.log(data);
-
-        data.sort((a, b) => new Date(a.date) - new Date(b.date));
-
+      if(data.success) {
+        data.data.sort((a, b) => new Date(a.date) - new Date(b.date));
         // Extract X and Y values
-        const labels = data.map(item => {
+        const labels = data.data.map(item => {
           const date = new Date(item.date);
           return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // e.g., Jun 01
         });
 
-        const progressValues = data.map(item => item.progress);
+        const progressValues = data.data.map(item => item.progress);
 
         setChartData({
           labels: labels,
@@ -44,11 +39,23 @@ const Reports = () => {
             tension: 0.3,
           }]
         });
+        }       
       });
+            
+      } catch (error) {
+            console.error('❌ Error in Fetching Data:', error.message);           
+      }
+
   }, []);
 
+    useEffect(() => {
+  fetchReports();
+  }, [fetchReports]);
+
+
   return (
-    <div className="p-4 bg-white shadow rounded-xl">
+      <div className="p-4 bg-white shadow rounded-xl">
+      <ToastContainer position="top-right" autoClose={3000} />
       {chartData ? (
         <Line data={chartData} />
       ) : (

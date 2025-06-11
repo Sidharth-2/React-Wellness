@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 
 const AuthPage = () => {
-  const [isSignup, setIsSignup] = useState(true); // toggle form
+  const [isSignup, setIsSignup] = useState(false); // toggle form
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -37,12 +37,9 @@ useEffect(() => {
 
       const result = await res.json();
 
-      console.log(result);
-
       if (res.ok) {
         setMessage(`${isSignup ? 'Signup' : 'Login'} successful!`);
         localStorage.setItem('token', result.token); // Store token if needed
-        console.log("Token: " + result.token);
         navigate('/dashboard');
       } else {
         setMessage(result.message || 'Authentication failed');
