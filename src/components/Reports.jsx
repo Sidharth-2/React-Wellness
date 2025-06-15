@@ -19,7 +19,7 @@ const Reports = () => {
         apiClient('http://localhost:8081/api/checkin/checkins/reports')
     .then(data => {
 
-      if(data.success) {
+    if (data !== null && typeof data === 'object' && data.status === 200) {
         data.data.sort((a, b) => new Date(a.date) - new Date(b.date));
         // Extract X and Y values
         const labels = data.data.map(item => {

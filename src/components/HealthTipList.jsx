@@ -1,23 +1,28 @@
 // HealthTipList.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../utils/apiClient';
 
 function HealthTipList({ onSelect }) {
   const [tips, setTips] = useState([]);
 
-  useEffect(() => {
 
-    const token = localStorage.getItem('token');
+  const fetchHealthTips = useCallback ( () => {
+  
+   const token = localStorage.getItem('token');
 
-  apiClient('http://localhost:8081/api/healthtips')
+    apiClient('http://localhost:8081/api/healthtips')
       .then(data => {
         
-        if(data.success) {
+        if (data !== null && typeof data === 'object' && data.status === 200) {
         setTips(data.data);
         }
       }
       )
   }, []);
+
+  useEffect(() => {
+    fetchHealthTips();
+  }, [fetchHealthTips]);
 
   return (
    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">

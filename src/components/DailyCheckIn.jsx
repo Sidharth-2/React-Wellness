@@ -18,7 +18,8 @@ const fetchCheckins = useCallback(() => {
     apiClient('http://localhost:8081/api/checkin/checkins')
       .then(data =>  {
 
-        if (data.success){
+        if (data !== null && typeof data === 'object' && data.status === 200)
+        if (data.success==true){
 
         const sorted = data.data.sort((a, b) => b.id - a.id);
         const last10 = sorted.slice(0, 10);

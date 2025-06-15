@@ -23,17 +23,22 @@ export const apiClient = async (url, options = {}) => {
     const response = await fetch(url, mergedOptions);
     const data = await response.json();
 
+    console.log(data);
+
+    if(response.status === 200) {
+    return data;
+    }
+
     // Handle expired/invalid token globally
-    if (response.status === 401 || data.message?.toLowerCase().includes("expired")) {
+    if (response.status === 401 || data.message?.toLowerCase().includes("expired") || response.status !== 200) {
       toast.error("Session expired. Redirecting to login...");
       localStorage.clear();
       setTimeout(() => {
         window.location.href = '/auth'; // or use navigate() in context
       }, 3000);
-      return;
-    }
-
-    return data;
+      return data;
+    }    
+    return ;
   } catch (error) {
     toast.error("Network or server error.");
     console.error("API Error:", error);

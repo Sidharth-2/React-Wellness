@@ -5,6 +5,7 @@ import HealthTip from './components/HealthTip';
 import DailyCheckIn from './components/DailyCheckIn';
 import Reports from './components/Reports';
 import Dashboard from './components/Dashboard';
+import OAuth2RedirectHandler from './utils/OAuth2RedirectHandler'
 import { ToastContainer } from 'react-toastify';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/" element={<AuthPage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
         </Routes>
           <ToastContainer position="top-center" autoClose={3000} />
       </div>

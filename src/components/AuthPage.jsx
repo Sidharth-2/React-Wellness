@@ -16,6 +16,11 @@ useEffect(() => {
   }
 }, []);
 
+  const handleOAuthLogin = () => {
+    // Redirect to Spring Boot's OAuth2 endpoint
+    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+  };
+
   const handleAuth = async (e) => {
     e.preventDefault();
     const url = isSignup
@@ -39,6 +44,8 @@ useEffect(() => {
 
       if (res.ok) {
         setMessage(`${isSignup ? 'Signup' : 'Login'} successful!`);
+        localStorage.setItem('username', result.data.username);
+          
         localStorage.setItem('token', result.token); // Store token if needed
         navigate('/dashboard');
       } else {
@@ -95,6 +102,19 @@ useEffect(() => {
       {isSignup ? 'Sign Up' : 'Login'}
     </button>
   </form>
+
+<div className="flex items-center gap-2">
+  <hr className="flex-grow border-t border-gray-300" />
+  <span className="text-sm text-gray-500">or</span>
+  <hr className="flex-grow border-t border-gray-300" />
+</div>
+
+        <button
+          onClick={handleOAuthLogin}
+          className="w-full py-2 font-semibold text-white bg-red-500 rounded hover:bg-red-600"
+        >
+          Continue with Google
+        </button>
 
   <p className="text-center mt-4 text-sm">
     {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}

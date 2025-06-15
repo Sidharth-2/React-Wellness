@@ -7,11 +7,18 @@ import Reports from './Reports';
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState('check-in');
   const navigate = useNavigate();
+    const [username, setUsername] = useState("");
 
 useEffect(() => {
   if (!localStorage.getItem('token')) {
     navigate('/dashboard');
   }
+
+  const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+
 }, []);
 
   const renderContent = () => {
@@ -32,6 +39,9 @@ useEffect(() => {
 
   return (
     <div className="main-class">
+       <div className="text-xl font-bold text-pink-600 ml-5">
+        Welcome, {username}
+      </div>
       <h1 className="text-center text-blue-600 text-3xl font-bold my-4">
         Dashboard
       </h1>
