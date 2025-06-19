@@ -10,6 +10,8 @@ const AuthPage = () => {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
+  const baseUrl = process.env.REACT_APP_API_AUTH_BASE_URL;
+
 useEffect(() => {
   if (localStorage.getItem('token')) {
     navigate('/dashboard');
@@ -18,14 +20,14 @@ useEffect(() => {
 
   const handleOAuthLogin = () => {
     // Redirect to Spring Boot's OAuth2 endpoint
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    window.location.href = '${baseUrl}/oauth2/authorization/google';
   };
 
   const handleAuth = async (e) => {
     e.preventDefault();
     const url = isSignup
-      ? 'http://localhost:8080/auth/signup'
-      : 'http://localhost:8080/auth/login';
+      ? `${baseUrl}auth/signup`
+      : `${baseUrl}auth/login`;
 
 
     try {
@@ -45,6 +47,8 @@ useEffect(() => {
       if (res.ok) {
         setMessage(`${isSignup ? 'Signup' : 'Login'} successful!`);
         localStorage.setItem('username', result.data.username);
+
+        localStorage.setItem('userId', result.data.id);
           
         localStorage.setItem('token', result.token); // Store token if needed
         navigate('/dashboard');

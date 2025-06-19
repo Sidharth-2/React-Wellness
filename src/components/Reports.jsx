@@ -10,13 +10,14 @@ Chart.register(CategoryScale, LinearScale, PointElement, LineElement);
 const Reports = () => {
 
   const [chartData, setChartData] = useState(null);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
   const fetchReports = useCallback(() => {
 
      try {
 
-        apiClient('http://localhost:8081/api/checkin/checkins/reports')
+    apiClient(`${baseUrl}api/checkin/checkins/reports`)
     .then(data => {
 
     if (data !== null && typeof data === 'object' && data.status === 200) {

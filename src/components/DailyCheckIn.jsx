@@ -9,17 +9,20 @@ const DailyCheckIn = () => {
   const [error, setError] = useState('');
   const [checkins, setCheckins] = useState([]);
   const [average, setAverage] = useState(null);
-  const [progress, setProgress] = useState(65); // you can dynamically update this
+  const [progress, setProgress] = useState(65);
+  const [status, setStatus] = useState(null);
+  const [jobId, setJobId] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
 const fetchCheckins = useCallback(() => {
 
-    const token = localStorage.getItem('token'); 
-
-    apiClient('http://localhost:8081/api/checkin/checkins')
+    apiClient(`${baseUrl}api/checkin/checkins`)
       .then(data =>  {
 
         if (data !== null && typeof data === 'object' && data.status === 200)
-        if (data.success==true){
+        if (data.success===true){
 
         const sorted = data.data.sort((a, b) => b.id - a.id);
         const last10 = sorted.slice(0, 10);
@@ -35,10 +38,117 @@ const fetchCheckins = useCallback(() => {
       .catch(error => console.error('Error fetching check-ins:', error));
   }, []);
 
-   useEffect(() => {      
-      fetchCheckins();
+  const hideStatus = async () => {
+
+    if (status === 'Download complete') {
+      const timer = setTimeout(() => {
+        setStatus('')
+      }, 3000)
+
+      return () => clearTimeout(timer) 
+    }
+
+  }
+
+   useEffect(() => {          
+      fetchCheckins();      
   },  [fetchCheckins]);
 
+
+     useEffect(() => {          
+       hideStatus();
+  },  [hideStatus]);
+
+
+  const generateReport = async () => {
+    setStatus('Starting...');
+    setDownloading(true);
+
+    const token = localStorage.getItem('token'); 
+    const userId = localStorage.getItem('userId'); 
+
+    console.log(token);
+    console.log(userId);
+
+    try {
+      // Step 1: Start the report generation
+      const res = await fetch(`${baseUrl}api/reports/checkins/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId })
+      });
+
+      const data = await res.json();
+      console.log(data);
+      setJobId(data.jobId);
+      setStatus('Report generation started. Waiting...');
+
+      console.log(token);
+
+      // Step 2: Poll for status every 3 seconds
+      const interval = setInterval(async () => {
+        const statusRes = await fetch(`${baseUrl}api/reports/checkins/status?jobId=${data.jobId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        });
+
+        const statusData = await statusRes.json();
+        setStatus(`Status: ${statusData.status}`);
+
+        if (statusData.status === 'COMPLETED') {
+          downloadReport(data.jobId);
+          clearInterval(interval);
+        } else if (statusData.status === 'FAILED') {
+          clearInterval(interval);
+          setStatus('Report generation failed.');
+          setDownloading(false);
+        }
+      }, 3000);
+
+    } catch (err) {
+      console.error(err);
+      //clearInterval(interval);
+      setStatus('Error starting report');
+      setDownloading(false);
+    }
+  };
+
+  const downloadReport = async (jobId) => {
+
+    const token = localStorage.getItem('token'); 
+
+    setStatus('Downloading...');
+    try {
+      const res = await fetch(`${baseUrl}api/reports/checkins/download/${jobId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) throw new Error("Download failed");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${jobId}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      setStatus('Download complete');
+    } catch (err) {
+      console.error(err);
+      setStatus('Failed to download');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,7 +174,7 @@ const fetchCheckins = useCallback(() => {
     try {
 
       const response = await axios.post(
-        'http://localhost:8081/api/checkin',
+        `${baseUrl}api/checkin`,
         {
           mood: mood.trim(),
           notes: notes.trim(),
@@ -138,9 +248,18 @@ const fetchCheckins = useCallback(() => {
 
     </form>
 
+<div className="flex items-center justify-between mt-8 mb-4 ml-5">
      <h2 className="text-2xl font-bold mt-8 mb-4 ml-5">
       Check-In History {average !== null && <span className="text-sm text-gray-600 ml-2">(Last 10 Days Avg: {average}%)</span>}
       </h2>
+
+      <div style={{ padding: '20px' }}>
+      <button onClick={generateReport} disabled={downloading}>
+        {downloading ? 'Please wait...' : 'Download Report'} 
+      </button>
+      {status && <p className="text-blue-400 text-base">{status}</p>}
+    </div>
+</div>
       <table className="min-w-full border-collapse border border-gray-300 ml-5">
         <thead>
           <tr className="bg-gray-200">

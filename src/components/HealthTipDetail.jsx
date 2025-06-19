@@ -4,13 +4,14 @@ import { apiClient } from '../utils/apiClient';
 
 function HealthTipDetail({ tipId }) {
   const [tip, setTip] = useState(null);
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
 
     const token = localStorage.getItem('token');
 
     if (tipId) {
-    apiClient(`http://localhost:8081/api/healthtips/${tipId}`)
+    apiClient(`${baseUrl}api/healthtips/${tipId}`)
     .then(data => setTip(data.data));
     }
   }, [tipId]);

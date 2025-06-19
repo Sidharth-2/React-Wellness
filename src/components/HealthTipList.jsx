@@ -5,12 +5,13 @@ import { apiClient } from '../utils/apiClient';
 function HealthTipList({ onSelect }) {
   const [tips, setTips] = useState([]);
 
-
   const fetchHealthTips = useCallback ( () => {
+
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;  
   
    const token = localStorage.getItem('token');
 
-    apiClient('http://localhost:8081/api/healthtips')
+    apiClient(`${baseUrl}api/healthtips`)
       .then(data => {
         
         if (data !== null && typeof data === 'object' && data.status === 200) {
