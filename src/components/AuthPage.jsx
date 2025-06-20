@@ -20,14 +20,14 @@ useEffect(() => {
 
   const handleOAuthLogin = () => {
     // Redirect to Spring Boot's OAuth2 endpoint
-    window.location.href = '${baseUrl}/oauth2/authorization/google';
+    window.location.href = 'https://wellness-production-9dcc.up.railway.app/oauth2/authorization/google';
   };
 
   const handleAuth = async (e) => {
     e.preventDefault();
     const url = isSignup
-      ? `${baseUrl}auth/signup`
-      : `${baseUrl}auth/login`;
+      ? `https://wellness-production-9dcc.up.railway.app/auth/signup`
+      : `https://wellness-production-9dcc.up.railway.app/auth/login`;
 
 
     try {
